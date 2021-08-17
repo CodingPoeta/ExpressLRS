@@ -144,8 +144,8 @@ void DynamicPower_Update()
     return;
   dynamic_power_updated = false;
 
-  // =============  LQ-based power boost up ==============  
-  // Quick boost up of power when detected any emergency LQ drops. 
+  // =============  LQ-based power boost up ==============
+  // Quick boost up of power when detected any emergency LQ drops.
   // It should be useful for bando or sudden lost of LoS cases.
   int32_t lq_current = crsf.LinkStatistics.uplink_Link_quality;
   int32_t lq_diff = (dynamic_power_avg_lq>>16) - lq_current;
@@ -158,12 +158,12 @@ void DynamicPower_Update()
       dynamic_power_rssi_n = 0;
   }
   // Moving average calculation, multiplied by 2^16 for avoiding (costly) floating point operation, while maintaining some fraction parts.
-  dynamic_power_avg_lq = ((int32_t)(DYNAMIC_POWER_MOVING_AVG_K - 1) * dynamic_power_avg_lq + (lq_current<<16)) / DYNAMIC_POWER_MOVING_AVG_K;   
+  dynamic_power_avg_lq = ((int32_t)(DYNAMIC_POWER_MOVING_AVG_K - 1) * dynamic_power_avg_lq + (lq_current<<16)) / DYNAMIC_POWER_MOVING_AVG_K;
 
   // =============  RSSI-based power adjustment ==============
   // It is working slowly, suitable for a general long-range flights.
-  
-  // Get the RSSI from the selected antenna.  
+
+  // Get the RSSI from the selected antenna.
   int8_t rssi = (crsf.LinkStatistics.active_antenna == 0)? crsf.LinkStatistics.uplink_RSSI_1: crsf.LinkStatistics.uplink_RSSI_2;
 
   dynamic_power_rssi_sum += rssi;
@@ -180,8 +180,8 @@ void DynamicPower_Update()
   int32_t rssi_dec_threshold = expected_RXsensitivity + 30;
 
   // Serial.print("Dynamic power: ");
-  // Serial.print(avg_rssi); 
-  // Serial.print(", "); 
+  // Serial.print(avg_rssi);
+  // Serial.print(", ");
   // Serial.println(dynamic_power_rssi_n);
 
   // Serial.print("CurrentPower: ");
@@ -208,7 +208,7 @@ void DynamicPower_Update()
   // Serial.print(dynamic_power_avg_lq>>16);
   // Serial.print("/");
   // Serial.println(lq_diff);
-  #endif    
+  #endif
 }
 
 void ICACHE_RAM_ATTR ProcessTLMpacket()
@@ -220,7 +220,7 @@ void ICACHE_RAM_ATTR ProcessTLMpacket()
 
   uint8_t type = Radio.RXdataBuffer[0] & TLM_PACKET;
   uint8_t TLMheader = Radio.RXdataBuffer[1];
-  
+
   if ((inCRC != calculatedCRC))
   {
 #ifndef DEBUG_SUPPRESS
@@ -492,7 +492,7 @@ void registerLuaParameters() {
         config.SetRate(arg);
       #if defined(HAS_OLED)
         OLED.updateScreen(OLED.getPowerString((PowerLevels_e)POWERMGNT.currPower()),
-                          OLED.getRateString((expresslrs_RFrates_e)arg), 
+                          OLED.getRateString((expresslrs_RFrates_e)arg),
                           OLED.getTLMRatioString((expresslrs_tlm_ratio_e)(ExpressLRS_currAirRate_Modparams->TLMinterval)), commitStr);
       #endif
     }
@@ -507,7 +507,7 @@ void registerLuaParameters() {
         config.SetTlm((expresslrs_tlm_ratio_e)arg);
       #if defined(HAS_OLED)
         OLED.updateScreen(OLED.getPowerString((PowerLevels_e)POWERMGNT.currPower()),
-                          OLED.getRateString((expresslrs_RFrates_e)ExpressLRS_currAirRate_Modparams->enum_rate), 
+                          OLED.getRateString((expresslrs_RFrates_e)ExpressLRS_currAirRate_Modparams->enum_rate),
                           OLED.getTLMRatioString((expresslrs_tlm_ratio_e)arg), commitStr);
       #endif
     }
@@ -519,10 +519,10 @@ void registerLuaParameters() {
       Serial.println(newPower, DEC);
     #endif
       config.SetPower(newPower < MaxPower ? newPower : MaxPower);
-      
+
     #if defined(HAS_OLED)
       OLED.updateScreen(OLED.getPowerString((PowerLevels_e)arg),
-                        OLED.getRateString((expresslrs_RFrates_e)ExpressLRS_currAirRate_Modparams->enum_rate), 
+                        OLED.getRateString((expresslrs_RFrates_e)ExpressLRS_currAirRate_Modparams->enum_rate),
                         OLED.getTLMRatioString((expresslrs_tlm_ratio_e)ExpressLRS_currAirRate_Modparams->TLMinterval), commitStr);
     #endif
   });
@@ -570,7 +570,7 @@ void registerLuaParameters() {
 void resetLuaParams(){
   setLuaTextSelectionValue(&luaAirRate,(uint8_t)(ExpressLRS_currAirRate_Modparams->index));
   setLuaTextSelectionValue(&luaTlmRate,(uint8_t)(ExpressLRS_currAirRate_Modparams->TLMinterval));
-  
+
   #ifdef USE_DYNAMIC_POWER
   setLuaTextSelectionValue(&luaPower,(uint8_t)(config.GetPower()));
   #else
@@ -795,8 +795,7 @@ void setup()
   // UID[0..2] are OUI (organisationally unique identifier) and are not ESP32 unique.  Do not use!
 #endif // PLATFORM_ESP32
 
-  long macSeed = ((long)UID[2] << 24) + ((long)UID[3] << 16) + ((long)UID[4] << 8) + UID[5];
-  FHSSrandomiseFHSSsequence(macSeed);
+  FHSSrandomiseFHSSsequence(uidMacSeedGet());
 
   Radio.RXdoneCallback = &RXdoneISR;
   Radio.TXdoneCallback = &TXdoneISR;
@@ -856,7 +855,7 @@ void setup()
   SetRFLinkRate(config.GetRate());
   ExpressLRS_currAirRate_Modparams->TLMinterval = (expresslrs_tlm_ratio_e)config.GetTlm();
   POWERMGNT.setPower((PowerLevels_e)config.GetPower());
-  
+
   registerLuaParameters();
   registerLUAPopulateParams(updateLUApacketCount);
 
